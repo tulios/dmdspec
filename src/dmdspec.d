@@ -19,6 +19,32 @@ Subject subject(T)(T obj) {
 	return null;
 }
 
+class GenSubject( T )
+{
+	T subject;
+	
+	this()
+	{
+		subject = T.init;
+	}
+	
+	this( T init )
+	{
+		subject = init;
+	}
+	
+	void print()
+	{
+		writeln( typeid( subject ).toString() );
+	}
+}
+
+GenSubject!( T ) subjectFactory( T )( T value )
+{
+	return new GenSubject!( T )( value );
+}
+
+
 interface Subject {
 	bool should(bool condition);
 	bool should(int condition);
