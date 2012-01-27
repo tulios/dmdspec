@@ -2,6 +2,9 @@ module dmdspec;
 
 import std.stdio;
 import std.array;
+import std.traits;
+
+import std.exception;
 
 public import matchers;
 public import dsl;
@@ -29,6 +32,23 @@ class Subject(T) {
 			throw new SpecFailureException("");
 		}
 		return result;
+	}
+	
+	@property bool shouldThrowException( E )() {
+		static if( isCallable!( T ) )
+			Exception ex = collectException( object() );
+		else
+			Exception ex = collectException( object );
+			
+		if ( ( ex is null ) || ( typeid( ex ) != typeid( E ) ) ) {
+			throw new SpecFailureException("");
+		}
+		return true;
+	}
+	
+	void writeType()
+	{
+		writeln( typeof( object ).stringof );
 	}
 }
 

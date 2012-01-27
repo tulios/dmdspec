@@ -15,3 +15,8 @@ auto beNull() {
 auto beEqual(T)(T obj) {
 	return obj;
 }
+
+/*throwException(T)(T ex) {
+
+}*/
+
