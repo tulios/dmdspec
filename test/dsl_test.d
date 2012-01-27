@@ -1,6 +1,7 @@
 import dmdspec;
 
-unittest {	
+unittest {
+	// Subject
 	assert(
 		subject(1).classinfo.toString() == "dmdspec.Subject!(int).Subject", 
 		"method subject should instantiate an object of type Subject!(int) when receive an int value"
@@ -13,4 +14,7 @@ unittest {
 		subject(null).classinfo.toString() == "dmdspec.Subject!(typeof(null)).Subject", 
 		"method subject should instantiate an object of type Subject!(typeof(null)) when receive a null value"
 	);
+	
+	// Describe
+	
 }
