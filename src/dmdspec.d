@@ -6,6 +6,12 @@ import std.array;
 public import matchers;
 public import dsl;
 
+class SpecFailureException : Exception {
+	this(string message) {
+		super(message);
+	}
+}
+
 class Subject(T) {
 	private T object;
 	
@@ -18,19 +24,50 @@ class Subject(T) {
 	}
 	
 	bool should(T condition) {
-		return this.object == condition;
+		bool result = this.object == condition;
+		if (!result) {
+			throw new SpecFailureException("");
+		}
+		return result;
 	}
+}
+
+class ExampleResult {
+	string status;
+	string prefix;
+	string message;
 }
 
 class Reporter {
 	static int level = 0;
+	static int examplesIndex = 0;
+	static ExampleResult[] failures;
 		
-	static void report(string description) {
-		writefln("%s%s", createLevel(), description);
+	static this() {
+	}
+	
+	static ~this() {
+		auto failuresCount = failures.length;
+		writefln(
+			"\nFinished! %d examples, %d %s", 
+			examplesIndex, 
+			failuresCount,
+			failuresCount > 1 ? "failures" : "failure"
+		);
+	}
+			
+	static void report(string description, ExampleResult example) {
+		examplesIndex++;
+		if (example.status == "success") {
+			writefln("%s%s", createLevel(), green(description));
+		} else {
+			failures ~= example;
+			writefln("%s%s", createLevel(), red(description));
+		}
 	}
 	
 	static void report(string description, void delegate() intention) {
-		report(description);
+		writefln("%s%s", createLevel(), description);
 		level++;
 		intention();
 		level--;
@@ -43,7 +80,19 @@ class Reporter {
 			app.put("  ");
 		}
 		return join(app.data);
-	}	
+	}
+	
+	private static string color(string text, string colorCode) {
+		return colorCode ~ text ~ "\033[0m";
+	}
+	
+	private static string green(string text) {
+		return color(text, "\033[32m");
+	}
+	
+	private static string red(string text) {
+		return color(text, "\033[31m");
+	}
 }
 
 

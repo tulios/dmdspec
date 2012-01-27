@@ -12,9 +12,14 @@ void describe(string description, void delegate() intention) {
 }
 
 void it(string description, void delegate() intention) {
+	ExampleResult example = new ExampleResult();
+	example.prefix = description;
 	try {
 		intention();
-	} catch (Exception e) {
+		example.status = "success";
+	} catch (SpecFailureException e) {
+		example.status = "fail";
+		example.message = e.msg;
 	}
-	Reporter.report(description);
+	Reporter.report(description, example);
 }
