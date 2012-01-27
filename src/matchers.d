@@ -1,13 +1,17 @@
 module matchers;
 
-auto be_equal(T)(T obj) {
-	return obj;
-}
-
-bool be_true() {
+bool beTrue() {
 	return true;
 }
 
-bool be_false() {
+bool beFalse() {
 	return false;
+}
+
+auto beNull() {
+	return beEqual(null);
+}
+
+auto beEqual(T)(T obj) {
+	return obj;
 }
