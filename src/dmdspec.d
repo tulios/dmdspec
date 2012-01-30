@@ -1,15 +1,20 @@
 module dmdspec;
 
 import std.stdio;
+import std.conv;
 import std.array;
 import std.traits;
-
 import std.exception;
+import std.Variant;
 
+import exampleResult;
 public import matchers;
 public import dsl;
 
 class SpecFailureException : Exception {
+	Variant expectation;
+	Variant got;
+	
 	this(string message) {
 		super(message);
 	}
@@ -29,7 +34,10 @@ class Subject(T) {
 	bool should(T condition) {
 		bool result = this.object == condition;
 		if (!result) {
-			throw new SpecFailureException("");
+			auto exception = new SpecFailureException("");
+			exception.expectation = this.object;
+			exception.got = condition;
+			throw exception;
 		}
 		return result;
 	}
@@ -52,22 +60,26 @@ class Subject(T) {
 	}
 }
 
-class ExampleResult {
-	string status;
-	string prefix;
-	string message;
-}
-
 class Reporter {
 	static int level = 0;
 	static int examplesIndex = 0;
 	static ExampleResult[] failures;
+	static string[] describes;
 		
 	static this() {
+		write("\n");
 	}
 	
 	static ~this() {
 		auto failuresCount = failures.length;
+		
+		writeln("\nFailures:");
+		foreach(int i, ExampleResult example ; failures) {
+			writefln("\n  %d) %s", i + 1, example.getMessage());
+			writefln(red("     expectation: %s"), to!(string)(example.getExpectation()));
+			writefln(red("             got: %s"), to!(string)(example.getGot()));
+		}
+		
 		writefln(
 			"\nFinished! %d examples, %d %s", 
 			examplesIndex, 
@@ -76,21 +88,36 @@ class Reporter {
 		);
 	}
 			
-	static void report(string description, ExampleResult example) {
+	static void report(ExampleResult example) {
 		examplesIndex++;
-		if (example.status == "success") {
-			writefln("%s%s", createLevel(), green(description));
+		if (example.isSuccess()) {
+			writefln("%s%s", createLevel(), green(example.getDescription()));
+			
 		} else {
+			example.setMessage(createContext(example.getDescription()));
+			string number = to!(string)(failures.length + 1);
+			
+			writefln(red("%s%s - (#%s)"), createLevel(), example.getDescription(), number);
 			failures ~= example;
-			writefln("%s%s", createLevel(), red(description));
 		}
 	}
 	
 	static void report(string description, void delegate() intention) {
+		describes ~= description;
+		
 		writefln("%s%s", createLevel(), description);
 		level++;
 		intention();
 		level--;
+	}
+	
+	private static string createContext(string description) {
+		string[] prefix;			
+		for(int i = 0; i < level - 1; i++) {
+			prefix ~= describes[i];
+		}
+			
+		return join(appender(prefix).data, " ") ~ " " ~ description;
 	}
 		
 	private static string createLevel() {
@@ -101,7 +128,7 @@ class Reporter {
 		}
 		return join(app.data);
 	}
-	
+		
 	private static string color(string text, string colorCode) {
 		return colorCode ~ text ~ "\033[0m";
 	}
@@ -114,21 +141,3 @@ class Reporter {
 		return color(text, "\033[31m");
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

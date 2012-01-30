@@ -2,6 +2,7 @@ module dsl;
 
 import std.stdio;
 import dmdspec;
+import exampleResult;
 
 Subject!(T) subject(T)(T value) {
 	return new Subject!(T)(value);
@@ -12,14 +13,17 @@ void describe(string description, void delegate() intention) {
 }
 
 void it(string description, void delegate() intention) {
-	ExampleResult example = new ExampleResult();
-	example.prefix = description;
-	try {
+	ExampleResult example = new ExampleResult(description);
+	
+	try {	
 		intention();
-		example.status = "success";
+		example.setStatus(ExampleResult.STATUS.SUCCESS);
+		
 	} catch (SpecFailureException e) {
-		example.status = "fail";
-		example.message = e.msg;
+		example.setStatus(ExampleResult.STATUS.FAIL);
+		example.setExpectation(e.expectation);
+		example.setGot(e.got);
 	}
-	Reporter.report(description, example);
+	
+	Reporter.report(example);
 }
