@@ -6,7 +6,7 @@ import std.conv;
 import dmdspec;
 import exampleResult;
 
-Subject!(T) subject(T)(T value) {
+Subject!(T) subject(T)(lazy T value) {
 	return new Subject!(T)(value);
 }
 

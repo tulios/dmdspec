@@ -39,12 +39,20 @@ void main() {
 				});
 			});
 		});
-		
+	});
+
+	describe("Integer numbers", {
+		describe("number 1", {
+			it("should be equal to 1", {
+				subject(1).should(beEqualTo(1));
+			});
+			it("should not be equal to 2", {
+				subject(1).shouldNot(beEqualTo(2));
+			});
+		});
 		describe("divided by 0", {
 			it("should throw an DividedByZeroException", {
-				
-				subject( { div( 1, 0 ); } ).shouldThrowException!DividedByZeroException;
-				
+				subject( { div( 1, 0 ); } ).should( throwAnException( "main.DividedByZeroException" ) );
 			});
 		});
 	});
@@ -60,6 +68,7 @@ class DividedByZeroException : Exception
 	}
 }
 
-double div( double x, double y ) {
+double div( double x, double y )
+{
 	throw new DividedByZeroException();
 }

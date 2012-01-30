@@ -20,7 +20,8 @@ class SpecFailureException : Exception {
 	}
 }
 
-class Subject(T) {
+class Subject( T )
+{
 	T object;
 	
 	this() {
@@ -31,30 +32,31 @@ class Subject(T) {
 		this.object = object;
 	}
 	
-	bool should(T condition) {
-		bool result = this.object == condition;
-		if (!result) {
+	bool should( M )( M matcher )
+	{
+		if( !matcher.evaluateWithSubject!( T )( this ) )
+		{
 			auto exception = new SpecFailureException("");
 			exception.expectation = this.object;
 			exception.got = condition;
 			throw exception;
 		}
-		return result;
+		return true;
 	}
-	
-	@property bool shouldThrowException( E )() {
-		static if( isCallable!( T ) )
-			Exception ex = collectException( object() );
-		else
-			Exception ex = collectException( object );
-			
-		if ( ( ex is null ) || ( typeid( ex ) != typeid( E ) ) ) {
-			throw new SpecFailureException("");
+
+	bool shouldNot( M )( M matcher )
+	{
+		if( matcher.evaluateWithSubject!( T )( this ) )
+		{
+			auto exception = new SpecFailureException("");
+			exception.expectation = this.object;
+			exception.got = condition;
+			throw exception;
 		}
 		return true;
 	}
 	
-	void writeType()
+	void writeObjectType()
 	{
 		writeln( typeof( object ).stringof );
 	}
