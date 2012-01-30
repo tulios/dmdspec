@@ -7,14 +7,7 @@ class ExampleResult {
 		SUCCESS,
 		FAIL
 	}
-	
-	private string description;
-	private string message;
-	private STATUS status;
-	
-	private Variant expectation;
-	private Variant got;
-	
+		
 	this(string description) {
 		this.description = description;
 	}
@@ -33,6 +26,14 @@ class ExampleResult {
 	
 	void setMessage(string message) {
 		this.message = message;
+	}
+	
+	void pushToStack(string line) {
+		this.stack ~= line;
+	}
+	
+	string[] getStack() {
+		return this.stack;
 	}
 	
 	STATUS getStatus() {
@@ -58,4 +59,12 @@ class ExampleResult {
 	Variant getGot() {
 		return this.got;
 	}
+	
+	private:
+		string description;
+		string message;
+		string[] stack;
+		STATUS status;
+		Variant expectation;
+		Variant got;	
 }

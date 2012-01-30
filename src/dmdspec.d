@@ -21,7 +21,7 @@ class SpecFailureException : Exception {
 }
 
 class Subject(T) {
-	private T object;
+	T object;
 	
 	this() {
 		this.object = T.init; // default initializer
@@ -74,10 +74,14 @@ class Reporter {
 		auto failuresCount = failures.length;
 		
 		writeln("\nFailures:");
+		auto defaultSpace = "     ";
 		foreach(int i, ExampleResult example ; failures) {
 			writefln("\n  %d) %s", i + 1, example.getMessage());
-			writefln(red("     expectation: %s"), to!(string)(example.getExpectation()));
-			writefln(red("             got: %s"), to!(string)(example.getGot()));
+			writefln(red("%sexpectation: %s"), defaultSpace, to!(string)(example.getExpectation()));
+			writefln(red("%s        got: %s"), defaultSpace, to!(string)(example.getGot()));
+			foreach(string line ; example.getStack()) {
+				writefln(grey("%s# %s"), defaultSpace, line);
+			}
 		}
 		
 		writefln(
@@ -111,33 +115,38 @@ class Reporter {
 		level--;
 	}
 	
-	private static string createContext(string description) {
-		string[] prefix;			
-		for(int i = 0; i < level - 1; i++) {
-			prefix ~= describes[i];
-		}
+	private:
+		static string createContext(string description) {
+			string[] prefix;			
+			for(int i = 0; i < level - 1; i++) {
+				prefix ~= describes[i];
+			}
 			
-		return join(appender(prefix).data, " ") ~ " " ~ description;
-	}
-		
-	private static string createLevel() {
-		string[] str = [];
-		auto app = appender(str);
-		for (int x = 0; x < level; x++) {
-			app.put("  ");
+			return join(appender(prefix).data, " ") ~ " " ~ description;
 		}
-		return join(app.data);
-	}
 		
-	private static string color(string text, string colorCode) {
-		return colorCode ~ text ~ "\033[0m";
-	}
+		static string createLevel() {
+			string[] str = [];
+			auto app = appender(str);
+			for (int x = 0; x < level; x++) {
+				app.put("  ");
+			}
+			return join(app.data);
+		}
+		
+		static string color(string text, string colorCode) {
+			return colorCode ~ text ~ "\033[0m";
+		}
 	
-	private static string green(string text) {
-		return color(text, "\033[32m");
-	}
+		static string green(string text) {
+			return color(text, "\033[32m");
+		}
 	
-	private static string red(string text) {
-		return color(text, "\033[31m");
-	}
+		static string red(string text) {
+			return color(text, "\033[31m");
+		}
+	
+		static string grey(string text) {
+			return color(text, "\033[36m");
+		}
 }

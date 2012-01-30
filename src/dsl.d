@@ -1,6 +1,8 @@
 module dsl;
 
 import std.stdio;
+import std.conv;
+
 import dmdspec;
 import exampleResult;
 
@@ -23,6 +25,7 @@ void it(string description, void delegate() intention) {
 		example.setStatus(ExampleResult.STATUS.FAIL);
 		example.setExpectation(e.expectation);
 		example.setGot(e.got);
+		example.pushToStack(to!(string)(e.file) ~ ":" ~ to!(string)(e.line));
 	}
 	
 	Reporter.report(example);
