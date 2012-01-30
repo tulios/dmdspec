@@ -36,9 +36,9 @@ class Subject( T )
 	{
 		if( !matcher.evaluateWithSubject!( T )( this ) )
 		{
-			auto exception = new SpecFailureException("");
+			auto exception = new SpecFailureException( "" );
 			exception.expectation = this.object;
-			exception.got = condition;
+			exception.got = matcher;
 			throw exception;
 		}
 		return true;
@@ -50,7 +50,7 @@ class Subject( T )
 		{
 			auto exception = new SpecFailureException("");
 			exception.expectation = this.object;
-			exception.got = condition;
+			exception.got = matcher;
 			throw exception;
 		}
 		return true;

@@ -9,7 +9,7 @@ void main() {
 				subject(true).should(beTrue());
 			});
 			it("should not be true when is false", {
-				subject(false).should(beTrue());
+				subject(false).shouldNot(beTrue());
 			});
 		});
 		describe("using beFalse", {
@@ -17,25 +17,25 @@ void main() {
 				subject(false).should(beFalse());
 			});
 			it("should not be false when is true", {
-				subject(true).should(beFalse());
+				subject(true).shouldNot(beFalse());
 			});
 		});
 		describe("using beEqual", {
 			describe("with numbers", {
 				it("should be equal to when is the same number", {
-					subject(1).should(beEqual(1));
+					subject(1).should(beEqualTo(1));
 				});
 				it("should not be equal when is a different number", {
-					subject(1).should(beEqual(2));
+					subject(1).shouldNot(beEqualTo(2));
 				});
 			});
 			
 			describe("with strings", {
 				it("should be equal to when is the same number", {
-					subject("string").should(beEqual("string"));
+					subject("string").should(beEqualTo("string"));
 				});
 				it("should not be equal when is a different number", {
-					subject("string").should(beEqual("another string"));
+					subject("string").shouldNot(beEqualTo("another string"));
 				});
 			});
 		});
