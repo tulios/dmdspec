@@ -7,6 +7,7 @@ import std.traits;
 import std.exception;
 import std.Variant;
 
+import console;
 import exampleResult;
 public import matchers;
 public import dsl;
@@ -79,10 +80,10 @@ class Reporter {
     auto defaultSpace = "     ";
     foreach(int i, ExampleResult example ; failures) {
       writefln("\n  %d) %s", i + 1, example.getMessage());
-      writefln(red("%sexpectation: %s"), defaultSpace, to!(string)(example.getExpectation()));
-      writefln(red("%s        got: %s"), defaultSpace, to!(string)(example.getGot()));
+      writecfln(Color.RED, "%sexpectation: %s", defaultSpace, to!(string)(example.getExpectation()));
+      writecfln(Color.RED, "%s        got: %s", defaultSpace, to!(string)(example.getGot()));
       foreach(string line ; example.getStack()) {
-        writefln(cyan("%s# %s"), defaultSpace, line);
+        writecfln(Color.CYAN, "%s# %s", defaultSpace, line);
       }
     }
 
@@ -97,13 +98,14 @@ class Reporter {
   static void report(ExampleResult example) {
     examplesIndex++;
     if (example.isSuccess()) {
-      writefln("%s%s", createLevel(), green(example.getDescription()));
+      writef(createLevel());
+      writecfln(Color.GREEN, example.getDescription());
 
     } else {
       example.setMessage(createContext(example.getDescription()));
       string number = to!(string)(failures.length + 1);
 
-      writefln(red("%s%s - (#%s)"), createLevel(), example.getDescription(), number);
+      writecfln(Color.RED, "%s%s - (#%s)", createLevel(), example.getDescription(), number);
       failures ~= example;
     }
   }
@@ -136,19 +138,19 @@ class Reporter {
       return join(app.data);
     }
 
-    static string color(string text, string colorCode) {
-      return colorCode ~ text ~ "\033[0m";
-    }
-
-    static string green(string text) {
-      return color(text, "\033[32m");
-    }
-
-    static string red(string text) {
-      return color(text, "\033[31m");
-    }
-
-    static string cyan(string text) {
-      return color(text, "\033[36m");
-    }
+//    static string color(string text, string colorCode) {
+//      return colorCode ~ text ~ "\033[0m";
+//    }
+//
+//    static string green(string text) {
+//      return color(text, "\033[32m");
+//    }
+//
+//    static string red(string text) {
+//      return color(text, "\033[31m");
+//    }
+//
+//    static string cyan(string text) {
+//      return color(text, "\033[36m");
+//    }
 }
