@@ -5,7 +5,7 @@ import std.conv;
 import std.array;
 import std.traits;
 import std.exception;
-import std.Variant;
+import std.variant;
 
 import console;
 import exampleResult;

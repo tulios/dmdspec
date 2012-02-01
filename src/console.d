@@ -55,8 +55,9 @@ version (Windows) {
 	
 }
 else version (Posix) {
-	
-	enum Color {
+	import core.vararg;
+             	
+	enum Color : string {
 		RED     = "\033[31m",
 		GREEN   = "\033[32m",
 		CYAN    = "\033[36m",
@@ -64,7 +65,7 @@ else version (Posix) {
 	}
 	
 	void writec(alias T)(Color color, string fmt, ...) {		
-		T(color ~ fmt ~ Color.RESET, _argptr);
+		T(cast(string)(color ~ fmt ~ Color.RESET), _argptr);
 	}
 	
 	alias writec!(std.stdio.writefln) writecfln;
