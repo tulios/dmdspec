@@ -113,33 +113,56 @@ class ThrowAnException : Matcher
 	}
 }
 
-class Have : Matcher
+abstract class Have : Matcher
 {
-	protected size_t valueToTest;
-	protected string lastSugarMethodCalled;
+	public:
+		@property string expectation()
+		{
+			return "";
+		}
+
+		@property string got()
+		{
+			return "";
+		}
+
+	protected:
+		size_t valueToTest;
+		string lastSugarMethodCalled;
+		
+		this( size_t valueToTest )
+		{
+			this.valueToTest = valueToTest;
+		}
 	
-	this( size_t valueToTest )
-	{
-		this.valueToTest = valueToTest;
-	}
-	
-	// Provides have with syntatic sugar
-	// opDispatch returning 'this' not working in a hierarchy --- I think this is a D bug...
-	/*auto opDispatch( string m, Args... )( Args  args )
-	{
-		lastSugarMethodCalled = m;
-		return this;
-	}*/
-	
-	@property string expectation()
-	{
-		return "";
-	}
-	
-	@property string got()
-	{
-		return "";
-	}
+		//
+		// We can't use opDispatch returning 'this', directly in the base class, expecting the compiler
+		// to understand its correct type in a hierarchy. This happens because opDispatch is a template,
+		// so being evaluated in compile time. Therefore, if we did this
+		//
+		// <'Have' derived class>( 2 ).<syntatic sugar method>.<'Have' derived class existing method>
+		//
+		// the compiler would, IN COMPILE TIME, evaluate the 'this' inside opDispatch as being
+		// of type Have, because of the <syntatic sugar method> call. Then, also in compile time,
+		// it would see that 'Have' has no method called <'Have' derived class existing method> and
+		// forward this last call also to opDispatch.
+		//
+		// Why can't the compiler understand that 'this' is in fact a <'Have' derived class>? Because,
+		// first of all, Have doesn't know a thing about its subclasses in compile time. Moreover,
+		// polymorphism is a RUNTIME feature.
+		//
+		// So our workaround was to create the template below and use it with the mixin feature in
+		// derived classes
+		//
+		template dispatch( T )
+		{
+			// Provides have with syntatic sugar
+			T opDispatch( string m, Args... )( Args  args )
+			{
+				lastSugarMethodCalled = m;
+				return this;
+			}
+		}
 }
 
 class HaveExactly : Have
@@ -162,12 +185,7 @@ class HaveExactly : Have
 		return subjectLength == valueToTest;
 	}
 	
-	// Provides have with syntatic sugar
-	HaveExactly opDispatch( string m, Args... )( Args  args )
-	{
-		lastSugarMethodCalled = m;
-		return this;
-	}
+	mixin dispatch!( HaveExactly );
 	
 	override @property string expectation()
 	{
@@ -188,6 +206,8 @@ class HaveAtLeast : Have
 	{
 		super( valueToTest );
 	}
+	
+	mixin dispatch!( HaveAtLeast );
 
 	override @property string expectation()
 	{
@@ -208,6 +228,8 @@ class HaveAtMost : Have
 	{
 		super( valueToTest );
 	}
+	
+	mixin dispatch!( HaveAtMost );
 
 	override @property string expectation()
 	{
