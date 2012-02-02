@@ -10,7 +10,7 @@ version (Windows) {
 	import std.c.windows.windows;
 	import std.windows.syserror;
 	
-	enum Color {
+	enum Color : WORD {
 		RED     = FOREGROUND_RED | FOREGROUND_INTENSITY,
 		GREEN   = FOREGROUND_GREEN | FOREGROUND_INTENSITY,
 		CYAN    = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
@@ -44,15 +44,11 @@ version (Windows) {
 		return previousColor;
 	}
 	
-	void writec(alias T)(WORD color, string fmt, ...) {
+	void writec(alias W, T...)(WORD color, string fmt, T args) {
 		WORD previousColor = setForegroundColor(color);
-		T(fmt, _argptr);
+		W(fmt, args);
 		setForegroundColor(previousColor);
 	}
-	
-	alias writec!(std.stdio.writefln) writecfln;
-	alias writec!(std.stdio.writef) writecf;
-	
 }
 else version (Posix) {
 	import core.vararg;
@@ -67,15 +63,15 @@ else version (Posix) {
 	void writec(alias W, T...)(Color color, string fmt, T args) {		
 		W(cast(string)(color ~ fmt ~ Color.RESET), args);
 	}
-	
-	void writecfln(T...)(Color color, string fmt, T args) {
-        writec!(std.stdio.writefln)(color, fmt, args);
-    }
-
-    void writecf(T...)(Color color, string fmt, T args) {
-        writec!(std.stdio.writef)(color, fmt, args);    
-    }
 }
 else {
 	static assert(NOT_IMPLEMENTED_YET);
+}
+
+void writecfln(T...)(Color color, string fmt, T args) {
+    writec!(std.stdio.writefln)(color, fmt, args);
+}
+
+void writecf(T...)(Color color, string fmt, T args) {
+    writec!(std.stdio.writef)(color, fmt, args);    
 }
