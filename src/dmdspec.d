@@ -137,20 +137,4 @@ class Reporter {
       }
       return join(app.data);
     }
-
-//    static string color(string text, string colorCode) {
-//      return colorCode ~ text ~ "\033[0m";
-//    }
-//
-//    static string green(string text) {
-//      return color(text, "\033[32m");
-//    }
-//
-//    static string red(string text) {
-//      return color(text, "\033[31m");
-//    }
-//
-//    static string cyan(string text) {
-//      return color(text, "\033[36m");
-//    }
 }

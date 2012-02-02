@@ -64,12 +64,17 @@ else version (Posix) {
 		RESET   = "\033[0m",
 	}
 	
-	void writec(alias T)(Color color, string fmt, ...) {		
-		T(cast(string)(color ~ fmt ~ Color.RESET), _argptr);
+	void writec(alias W, T...)(Color color, string fmt, T args) {		
+		W(cast(string)(color ~ fmt ~ Color.RESET), args);
 	}
 	
-	alias writec!(std.stdio.writefln) writecfln;
-	alias writec!(std.stdio.writef) writecf;
+	void writecfln(T...)(Color color, string fmt, T args) {
+        writec!(std.stdio.writefln)(color, fmt, args);
+    }
+
+    void writecf(T...)(Color color, string fmt, T args) {
+        writec!(std.stdio.writef)(color, fmt, args);    
+    }
 }
 else {
 	static assert(NOT_IMPLEMENTED_YET);
