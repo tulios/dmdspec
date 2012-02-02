@@ -1,3 +1,10 @@
-*.o
-*.orig
+bin/
+import/
+obj/
 dmdspec
+*.o
+*.obj
+*.orig
+*.exe*.buildpath
+*.project
+*.rf
