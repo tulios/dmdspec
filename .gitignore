@@ -1,2 +1,3 @@
-dmdspec.o
+*.o
+*.orig
 dmdspec

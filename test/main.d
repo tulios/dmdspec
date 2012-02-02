@@ -20,7 +20,7 @@ void main() {
 				subject(true).shouldNot(beFalse());
 			};
 		};
-		describe("using beEqual") = {
+		describe("using beEqualTo") = {
 			describe("with numbers") = {
 				it("should be equal to when is the same number") = {
 					subject(1).should(beEqualTo(1));
@@ -36,6 +36,13 @@ void main() {
 				};
 				it("should not be equal when is a different number") = {
 					subject("string").shouldNot(beEqualTo("another string"));
+				};
+			};
+		};
+		describe("using haveExactly") = {
+			describe("with arrays") = {
+				it("should pass when testing exactly the array's length") = {
+					subject( [1, 2, 3] ).should( haveExactly( 2 ).elements );
 				};
 			};
 		};
@@ -58,6 +65,16 @@ void main() {
 	};
 }
 
+class DividedByZeroException123 : Exception
+{
+	this(){
+		super("Divided by zero exception");
+	}
+	this(string message){
+		this();
+	}
+}
+
 class DividedByZeroException : Exception
 {
 	this(){
@@ -70,5 +87,5 @@ class DividedByZeroException : Exception
 
 double div( double x, double y )
 {
-	throw new DividedByZeroException();
+	throw new DividedByZeroException123();
 }

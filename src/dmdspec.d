@@ -23,44 +23,46 @@ class SpecFailureException : Exception {
 
 class Subject( T )
 {
-  T object;
+	public:
+		T object;
 
-  this() {
-    this.object = T.init; // default initializer
-  }
+		this()
+		{
+			this.object = T.init; // default initializer
+		}
 
-  this(T object) {
-    this.object = object;
-  }
+		this( T object )
+		{
+			this.object = object;
+		}
 
-  bool should( M )( M matcher )
-  {
-    if( !matcher.evaluateWithSubject!( T )( this ) )
-    {
-      auto exception = new SpecFailureException( "" );
-      exception.expectation = this.object;
-      exception.got = matcher;
-      throw exception;
-    }
-    return true;
-  }
+		bool should( M )( M matcher )
+		{
+			return testExpectation( matcher, true );
+		}
 
-  bool shouldNot( M )( M matcher )
-  {
-    if( matcher.evaluateWithSubject!( T )( this ) )
-    {
-      auto exception = new SpecFailureException("");
-      exception.expectation = this.object;
-      exception.got = matcher;
-      throw exception;
-    }
-    return true;
-  }
-
-  void writeObjectType()
-  {
-    writeln( typeof( object ).stringof );
-  }
+		bool shouldNot( M )( M matcher )
+		{
+			return testExpectation( matcher, false );
+		}
+	
+	private:	
+		bool testExpectation( M )( M matcher, bool expectedMatcherRetValue )
+		{
+			if( matcher.evaluateWithSubject!( T )( this ) == expectedMatcherRetValue )
+				return true;
+			
+			reportErrorForMatcher( matcher );
+			return false;
+		}
+	
+		void reportErrorForMatcher( Matcher matcher )
+		{
+			auto exception = new SpecFailureException( "" );
+		    exception.expectation = matcher.expectation;
+		    exception.got = matcher.got;
+		    throw exception;
+		}
 }
 
 class Reporter {
