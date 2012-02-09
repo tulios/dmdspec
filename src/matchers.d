@@ -116,132 +116,119 @@ class ThrowAnException : Matcher
 abstract class Have : Matcher
 {
 	public:
+		bool evaluateWithSubject( N )( Subject!( N ) s )
+		{
+			subjectLength = s.object.length;
+			return haveTest();
+		}
+		
 		@property string expectation()
 		{
-			return "";
+			auto haveQualifier = expectationHaveQualifier;
+			if( haveQualifier.length )
+				haveQualifier ~= " ";
+				
+			auto sugarMethod = lastSugarMethodCalled;
+			if( sugarMethod.length )
+				sugarMethod = " " ~ sugarMethod;
+		
+			auto writer = appender!string();
+			formattedWrite( writer, "have %s%s%s", haveQualifier, lengthToTest, sugarMethod );
+			return writer.data;
 		}
 
 		@property string got()
 		{
-			return "";
+			return to!string( subjectLength );
 		}
 
 	protected:
-		size_t valueToTest;
+		size_t lengthToTest;
+		size_t subjectLength;
+		
 		string lastSugarMethodCalled;
 		
-		this( size_t valueToTest )
+		this( size_t lengthToTest )
 		{
-			this.valueToTest = valueToTest;
+			this.lengthToTest = lengthToTest;
 		}
-	
-		//
-		// We can't use opDispatch returning 'this', directly in the base class, expecting the compiler
-		// to understand its correct type in a hierarchy. This happens because opDispatch is a template,
-		// so being evaluated in compile time. Therefore, if we did this
-		//
-		// <'Have' derived class>( 2 ).<syntatic sugar method>.<'Have' derived class existing method>
-		//
-		// the compiler would, IN COMPILE TIME, evaluate the 'this' inside opDispatch as being
-		// of type Have, because of the <syntatic sugar method> call. Then, also in compile time,
-		// it would see that 'Have' has no method called <'Have' derived class existing method> and
-		// forward this last call also to opDispatch.
-		//
-		// Why can't the compiler understand that 'this' is in fact a <'Have' derived class>? Because,
-		// first of all, Have doesn't know a thing about its subclasses in compile time. Moreover,
-		// polymorphism is a RUNTIME feature.
-		//
-		// So our workaround was to create the template below and use it with the mixin feature in
-		// derived classes
-		//
-		template dispatch( T )
+		
+		bool haveTest()
 		{
-			// Provides have with syntatic sugar
-			T opDispatch( string m, Args... )( Args  args )
-			{
-				lastSugarMethodCalled = m;
-				return this;
-			}
+			return false;
+		}
+		
+		@property string expectationHaveQualifier()
+		{
+			return "";
+		}
+		
+		// Provides have with syntatic sugar
+		Have opDispatch( string m, Args... )( Args  args )
+		{
+			lastSugarMethodCalled = m;
+			return this;
 		}
 }
 
 class HaveExactly : Have
 {
-	private size_t subjectLength;
-	
-	this( size_t valueToTest )
-	{
-		super( valueToTest );
-	}
-
-	bool evaluateWithSubject( N )( Subject!( N ) s )
-	{
-		if( valueToTest == 0 )
+	public:
+		this( size_t lengthToTest )
 		{
-			subjectLength = 0;
-			return s.object.empty;
+			super( lengthToTest );
 		}
-		subjectLength = s.object.length;
-		return subjectLength == valueToTest;
-	}
-	
-	mixin dispatch!( HaveExactly );
-	
-	override @property string expectation()
-	{
-		auto writer = appender!string();
-		formattedWrite( writer, "have exactly %s %s", valueToTest, lastSugarMethodCalled );
-		return writer.data;
-	}
-	
-	override @property string got()
-	{
-		return to!string( subjectLength );
-	}
+		
+	protected:
+		override bool haveTest()
+		{
+			return subjectLength == lengthToTest;
+		}
+		
+		override @property string expectationHaveQualifier()
+		{
+			return "exactly";
+		}
 }
 
 class HaveAtLeast : Have
 {
-	this( size_t valueToTest )
-	{
-		super( valueToTest );
-	}
-	
-	mixin dispatch!( HaveAtLeast );
-
-	override @property string expectation()
-	{
-		auto writer = appender!string();
-		formattedWrite( writer, "have at least %s", valueToTest );
-		return writer.data;
-	}
-	
-	override @property string got()
-	{
-		return "TODO !!!";
-	}
+	public:
+		this( size_t lengthToTest )
+		{
+			super( lengthToTest );
+		}
+		
+	protected:
+		override bool haveTest()
+		{
+			return subjectLength >= lengthToTest;
+		}
+		
+		override @property string expectationHaveQualifier()
+		{
+			return "at least";
+		}
 }
 
 class HaveAtMost : Have
 {
-	this( size_t valueToTest )
-	{
-		super( valueToTest );
-	}
-	
-	mixin dispatch!( HaveAtMost );
-
-	override @property string expectation()
-	{
-		auto writer = appender!string();
-		formattedWrite( writer, "have at most %s", valueToTest );
-		return writer.data;
-	}
-	
-	override @property string got()
-	{
-		return "TODO !!!";
-	}
+	public:
+		this( size_t lengthToTest )
+		{
+			super( lengthToTest );
+		}
+		
+	protected:
+		override bool haveTest()
+		{
+			return subjectLength <= lengthToTest;
+		}
+		
+		override @property string expectationHaveQualifier()
+		{
+			return "at most";
+		}
 }
 
 auto beTrue()
@@ -269,8 +256,18 @@ auto throwAnException( string exceptionTypeName )
 	return new ThrowAnException( exceptionTypeName );
 }
 
-auto haveExactly( size_t valueToTest )
+auto haveExactly( size_t lengthToTest )
 {
-	return new HaveExactly( valueToTest );
+	return new HaveExactly( lengthToTest );
+}
+
+auto haveAtLeast( size_t lengthToTest )
+{
+	return new HaveAtLeast( lengthToTest );
+}
+
+auto haveAtMost( size_t lengthToTest )
+{
+	return new HaveAtMost( lengthToTest );
 }
 

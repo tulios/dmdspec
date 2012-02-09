@@ -41,8 +41,22 @@ void main() {
 		};
 		describe("using haveExactly") = {
 			describe("with arrays") = {
-				it("should pass when testing exactly the array's length") = {
+				it("should pass when tested value is exactly the array's length") = {
 					subject( [1, 2, 3] ).should( haveExactly( 2 ).elements );
+				};
+			};
+		};
+		describe("using haveAtLeast") = {
+			describe("with arrays") = {
+				it("should pass when tested value is lesser than or equal to the array's length") = {
+					subject( [1, 2, 3] ).should( haveAtLeast( 1 ).items );
+				};
+			};
+		};
+		describe("using haveAtMost") = {
+			describe("with arrays") = {
+				it("should pass when tested value is greater than or equal to the array's length") = {
+					subject( [1, 2, 3] ).should( haveAtMost( 5 ).slots );
 				};
 			};
 		};
